@@ -51,7 +51,7 @@ mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
 LANDMARK_SPEC = mp_drawing.DrawingSpec(
-    color=(0, 255, 0),  # bright green
+    color=(203, 192, 255),  # pink
     thickness=6,
     circle_radius=5,
 )
@@ -430,14 +430,14 @@ def dictionary():
       <style>
         body {{
           font-family: Arial, sans-serif;
-          background: #ffe6f2;
+          background: #ffb6c1;
           margin: 0;
           padding: 20px;
         }}
         .container {{
           max-width: 900px;
           margin: 0 auto;
-          background: #ffffff;
+          background: #ffe6f2;
           padding: 20px;
           border-radius: 8px;
           box-shadow: 0 2px 6px rgba(0,0,0,0.1);
