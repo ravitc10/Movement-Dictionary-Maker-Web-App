@@ -1,3 +1,17 @@
+"""
+The first import statement imports Flask to make an application using the Flask framework. It specifically
+also imports the necessary modules for prosessing JSON responses, making requests, file sending and 
+URL redirection. 
+
+The import statements also bring Pathlib, Datetime, cv2, mediapipe, numpy, and re into the code. Each having a 
+specific function. Pathlib makes the storing and accessing of files simpker, a necessity with this project. 
+datetime allows the videos the users to record to be labeled with their date and time (timestamped). cv2 allows for 
+video reading and processing. It is also the module that allows the computer to access the camera. Mediapipe
+is the most important module, and it allows the videos to have landmark markers for the humans featured in them.
+This is what gives the videos the 'stick figure' effect. Numpy is used for the processing of the videos, as 
+Mediapipe requires videos to be processed as individual frames and the re module helps to sanatize (make computer readable)
+the names the users give their movement dictionary entries.
+"""
 from flask import Flask, request, jsonify, send_file, redirect, url_for
 from pathlib import Path
 from datetime import datetime
@@ -8,7 +22,14 @@ import re
 
 app = Flask(__name__)
 
-# ---------- Paths ----------
+"""
+This part of the code establishes the upload paths for the raw user video as 
+well as the user video that is processed with media pipe. It first establishes
+a root directory called BASE_DIR and also establishes an UPLOAD_DIR within this root 
+directory. It also establishes the existence of the movement dictionary sub directory 
+(MOVEMENT_DICT_DIR) within the base directory. This is where the user's videos that are 
+processed with MediaPipe will be stored. 
+"""
 
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE_DIR / "uploads"
@@ -17,31 +38,42 @@ MOVEMENT_DICT_DIR = BASE_DIR / "movement_dictionary"
 UPLOAD_DIR.mkdir(exist_ok=True)
 MOVEMENT_DICT_DIR.mkdir(exist_ok=True)
 
-# ---------- MediaPipe setup ----------
+"""
+The following code contaings the set-up for usage of the MediaPipe module, which tracks
+Human movement using lines. It creates a 'stick-figure' effect. Lines 6 through 50 (LANDMARK_SPEC) 
+Set the thickness of these lines to 6 and the color of the lines to bright green. Lines 50 through 55 
+(CONNECTION_SPEC) set the color of the connecting circles to bright green and the thickness to 6
+You can think of the lines (LANDMARK_SPEC) as the bones and the circular connectors (CONNECTION_SPEC)
+As the joints. 
+"""
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
-# Thicker pose drawing settings
 LANDMARK_SPEC = mp_drawing.DrawingSpec(
     color=(0, 255, 0),  # bright green
-    thickness=4,
+    thickness=6,
     circle_radius=5,
 )
 CONNECTION_SPEC = mp_drawing.DrawingSpec(
     color=(0, 255, 0),
-    thickness=4,
+    thickness=6,
     circle_radius=5,
 )
 
-
 def sanitize_name(name: str) -> str:
+    
     """
-    Turn a user-entered name into a safe filename base:
-    - keep letters, numbers, spaces, underscores, dashes
-    - collapse spaces to underscores
-    - strip leading/trailing underscores
+
+    The sanitize_name function makes the name that users enter for their videos usable for the 
+    App. It does this by replacing spaces with underscores, making the user entered name viable!
+
+    This allows users to view their movement dictionary entries with actual names
+    Instead of a long computer generated string. This will also help users remember the 
+    Concept they created their movement dictionary entry to represent. 
+
     """
+
     if not name:
         return ""
     cleaned = re.sub(r"[^A-Za-z0-9 _-]+", "", name)
@@ -49,25 +81,34 @@ def sanitize_name(name: str) -> str:
     cleaned = cleaned.strip("_")
     return cleaned
 
-
 def process_video_to_landmarks(input_path: Path, output_path: Path) -> bool:
     """
-    Take an input video file, convert each frame to pose-landmark overlays
-    on a BLACK BACKGROUND, and save as a new MP4 at output_path.
+    This function opens and reads the video imput that the user creates. If it fails it prints
+    an error message. If it can read the video, it retrieves information about the input (width and height)
+    and (number of frames, setting to 20 for a default if the imput does not specify) Then, it writes an
+    output path that matches the specifications of the input. Next it brings in the MediaPipe module with the 
+    correct specifications for this task: continous pose detection with medium complexity. Then the function
+    starts a frame processing loop for user input videos. It converts the background of the frames to black, draws 
+    landmarks on each, and processes them into video form. 
+
     """
+
+    # Open input video for processing
     cap = cv2.VideoCapture(str(input_path))
     if not cap.isOpened():
         print("Could not open input video:", input_path)
         return False
 
+    # gain information about the input video's fps (frames per second) and frame size
     fps = cap.get(cv2.CAP_PROP_FPS) or 20
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-    # Write output as MP4
+    # Write output path with same fps and frame size as input
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     out = cv2.VideoWriter(str(output_path), fourcc, fps, (width, height))
 
+    # Begins mediapipe pose processing, makes sure the mediapipe settings are appropriate
     pose = mp_pose.Pose(
         static_image_mode=False,
         model_complexity=1,
@@ -76,19 +117,20 @@ def process_video_to_landmarks(input_path: Path, output_path: Path) -> bool:
         min_tracking_confidence=0.5,
     )
 
+    # Begin frame processing loop
     while True:
         ret, frame = cap.read()
         if not ret:
             break
 
-        # Run pose detection on the original frame
+        # Convert BGR to RGB for mediapipe processing
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = pose.process(rgb)
 
-        # Create a black background image
+        # Processes frames with black background. 
         black = np.zeros_like(frame)  # same (H, W, 3), all zeros
 
-        # Draw landmarks onto the black canvas
+        # Actually draw the landmarks (stick figrures) on the individual black frames
         if results.pose_landmarks:
             mp_drawing.draw_landmarks(
                 black,
@@ -105,7 +147,16 @@ def process_video_to_landmarks(input_path: Path, output_path: Path) -> bool:
     return True
 
 
-# ---------- Front page: record in browser ----------
+"""
+Now the code moves to specifying the front-end Web-App environment for the Movement Dictionary application.
+Here, the code switches to HTML. It first specifies the title and font of the WebApp as well 
+as other dimensions. It also sets up the video recording on the front page of the WebApp, and it sets up the 
+text to click to navigate to the movement dictionary page as well. It also explains the 
+video recording experience that the user will have, what the recording buttons look like, and what 
+error messages the user will recieve if the recording does not go according to plan or if the user's 
+browser will not let them record. This section of the code also introduces Java script for video recording. 
+
+"""
 
 @app.route("/")
 def index():
@@ -118,14 +169,14 @@ def index():
       <style>
         body {
           font-family: Arial, sans-serif;
-          background: #f5f5f5;
+          background: #ffb6c1;
           margin: 0;
           padding: 20px;
         }
         .container {
           max-width: 800px;
           margin: 0 auto;
-          background: #ffffff;
+          background: #ffe6f2;
           padding: 20px;
           border-radius: 8px;
           box-shadow: 0 2px 6px rgba(0,0,0,0.1);
@@ -169,11 +220,12 @@ def index():
         <h1>Movement Dictionary Maker</h1>
         <p>
 
-          1. This app will record parts of your movement sentence and process them with line animation on a <strong>black background</strong>. It saves the processed videos into the
+          This app will record parts of your movement sentence and process them with line animation on a <strong>black background</strong>. It saves the processed videos into the
              <strong>movement_dictionary</strong> folder. <br>
+          1. Name your movement concept and it will be saved with that name.<br>
           2. Click <strong>Start Recording</strong> to record a movement.<br>
           3. Click <strong>Stop Recording</strong> to end.<br>
-          4. Name your clip (optional) and it will be saved with that name.<br>
+          4. Visit the Movement Dictionary page to view your movement concept.<br>
         </p>
 
         <label for="clipName">Name this clip:</label>
@@ -191,7 +243,6 @@ def index():
         let mediaRecorder;
         let recordedChunks = [];
         let streamRef = null;
-
         const preview = document.getElementById('preview');
         const statusEl = document.getElementById('status');
         const nameInput = document.getElementById('clipName');
@@ -281,24 +332,33 @@ def index():
     return html
 
 
-# ---------- API: receive recording, process, save ----------
+'''
+This next section of the code recieves and saves the user's recorded video blob. Then it processes the 
+video into a mediapipe landmark MP4 using the process_video_to_landmarks function. It will then
+return a JSON success or error. 
+'''
 
+# Reads the user 'video' and returns an error message if there is no video to be read
 @app.route("/upload_recording", methods=["POST"])
 def upload_recording():
     file = request.files.get("video")
     if not file:
         return jsonify({"status": "error", "error": "No video uploaded"}), 400
 
+    # Reads the name the user provided, it will use an empty string if there was no provided name
     user_name = request.form.get("name", "") or ""
+    # Converts the user name is a sanitized, readable name
     safe_name = sanitize_name(user_name)
 
+    # Creates a timestamp for the file
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # Save raw recording (container/codec depends on browser; extension is just a label)
+    # Saves the video blob to a upload folder and uses .bin to account for blob containers that vary by browser. 
     input_path = UPLOAD_DIR / f"record_{timestamp}.bin"
     file.save(str(input_path))
 
-    # Decide final filename
+    # This names the output file using the sanitized user input or a tiemstamp string
+    # Creates MP4 and a specifies that the processed MP4 should go to the movement_dictionary folder
     if safe_name:
         base_name = safe_name
     else:
@@ -307,25 +367,37 @@ def upload_recording():
     final_name = base_name + ".mp4"
     final_path = MOVEMENT_DICT_DIR / final_name
 
-    # If a file with that name already exists, append timestamp suffix
+    # If a file with that name already exists, add the timestamp to differentiate and not overwrite existing video
     if final_path.exists():
         final_name = f"{base_name}_{timestamp}.mp4"
         final_path = MOVEMENT_DICT_DIR / final_name
 
-    # Process recording directly into landmarks video saved in movement_dictionary
+    # Processes the output video into mediapipe landmarks and returns an error if this does not works
     if not process_video_to_landmarks(input_path, final_path):
         return jsonify({"status": "error", "error": "Processing failed"}), 500
 
+    # return jsonify when successful
     return jsonify({"status": "ok", "filename": final_name})
 
 
-# ---------- View & manage Movement Dictionary ----------
+'''
+This next section of code specifies the front-end for the Movement Dictionary page of the WebApp,
+where the processed MediaPipe videos are viewable for the users. It begins by defining a dictionary()
+function in which all the files in the MOVEMENT_DICT_DIR directory, which are the MediaPipe processed files
+are sorted. It it will either return a message that there are no 
+files yet in the MOVqEMENT_DICT_DIR directory or it will initiate a for loop to create HTML for each clip.
+
+It also specifies the aesthetics of the movement dictionary page, including a delete button for each video, 
+the backend function of which is explained in the delete_clip() function in the next section of the code. 
+'''
 
 @app.route("/dictionary")
 def dictionary():
     files = sorted(MOVEMENT_DICT_DIR.glob("*.mp4"))
 
     items_html = ""
+
+    # This shows a message if the user has not recorded any files yet
     if not files:
         items_html = "<p>You don't have any saved clips yet.</p>"
     else:
@@ -358,7 +430,7 @@ def dictionary():
       <style>
         body {{
           font-family: Arial, sans-serif;
-          background: #f5f5f5;
+          background: #ffe6f2;
           margin: 0;
           padding: 20px;
         }}
@@ -378,7 +450,7 @@ def dictionary():
     <body>
       <div class="container">
         <p><a href="/">⬅︎ Back to Recorder</a></p>
-        <h1>📚 Movement Dictionary</h1>
+        <h1>Movement Dictionary</h1>
         {items_html}
       </div>
     </body>
@@ -386,7 +458,13 @@ def dictionary():
     """
     return html
 
-
+"""
+The next section of the code creates the user's ability to delete entries into their movement dictionaries that 
+they no longer want to have in the dictionary. It defines a function to do this called 
+delete_clip. It specofoes that the file exists. If the file does not exist, it returns an
+error. If the file does exist, it deletes the file (this is done through the file_path.unlink() method in line 474).
+Then it redirects the user back to the movement dictionary page. 
+"""
 @app.route("/delete_clip", methods=["POST"])
 def delete_clip():
     filename = request.form.get("filename", "")
@@ -402,16 +480,22 @@ def delete_clip():
 
     return redirect(url_for("dictionary"))
 
-
+"""
+This part of the code defines a function, serve_movement_file(), that specifies to the 
+browser the MIME (Multipurpose Internet Mail Extentions), which in this case is mp4, so that
+the browser knows how to play the videos on the movement dictionary page
+"""
 @app.route("/movement/<path:filename>")
 def serve_movement_file(filename):
     file_path = MOVEMENT_DICT_DIR / filename
     if not file_path.exists():
         return "File not found", 404
-    # Force MIME type so the browser knows how to play it
+    # Force MIME (Multipurpose Internet Mail Extentions) type so the browser knows how to play it
     return send_file(file_path, mimetype="video/mp4")
 
 
+"""
+This part of the code runs the app with the debugger enabled.
+"""
 if __name__ == "__main__":
     app.run(debug=True)
-
