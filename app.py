@@ -56,7 +56,7 @@ LANDMARK_SPEC = mp_drawing.DrawingSpec(
     circle_radius=5,
 )
 CONNECTION_SPEC = mp_drawing.DrawingSpec(
-    color=(0, 255, 0),
+    color=(203, 192, 255), # pink
     thickness=6,
     circle_radius=5,
 )
