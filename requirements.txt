@@ -1,4 +1,5 @@
-flask
-opencv-python
+flask>=2.3
+gunicorn
+opencv-python-headless
 mediapipe
-numpy
+numpy>=1.26
