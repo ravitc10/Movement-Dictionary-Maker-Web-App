@@ -2,21 +2,18 @@ Movement Dictionary App
 
 This app lets you or your students:
 1. Record a movement with your webcam in the browser
-2. Automatically convert it to MediaPipe pose landmarks drawn in thick green lines on a black background
+2. Automatically convert it to MediaPipe pose landmarks drawn in thick pink lines on a black background
 3. Save and review clips in a personal Movement Dictionary
-4. Rename clips and delete them from the dictionary
-5. It runs entirely on your own computer. You do not upload your videos to any external server.
+4. Delete clips from the dictionary
+
+Directions to run the app locally on your own computer:
 
 What you need
 1. A computer with a webcam
 2. Python 3.10 or 3.11 installed
-3. A web browser (Chrome, Safari, or Edge)
+3. A Web Browser (Preferably Safari)
 
-To check your Python version (Mac) Type:
-
-  python3 --version
-
-**Download the project**
+**Step One: Download the project**
 If using GitHub (recommended):
 
 1.  Go to the repository link:
@@ -24,32 +21,33 @@ If using GitHub (recommended):
 [https://github.com/YOUR_USERNAME/movement-dictionary-app](https://github.com/ravitc10/Movement-Dictionary-Maker-Web-App)
 
 2. Click Code → Download ZIP
-3. Unzip the folder somewhere easy (like Desktop)
+3. Upload the folder into your coding environment
 
-**You should now see a folder containing:**
+_You should now see a folder containing:_
   a. app.py
   b. requirements.txt
   c. README.md
   d. Folders like movement_dictionary and uploads (they may be empty)
 
-4. Open a terminal in that folder
+4. Open a terminal in that folder and verify that you are in the correct folder by prompting python with: pwd
+Click enter and you should see something like:
    
-On Mac:
-  a. Open Terminal
-  b. Type cd (with a space)
-  c. Drag the project folder into the Terminal window → press Enter
+/Users/yourname/Desktop/movement-dictionary-app
 
-**Example:**
-cd /Users/yourname/Desktop/movement-dictionary-app
+5. If you do not see: /Users/yourname/Desktop/movement-dictionary-app , you can navigate here with the following commands:
+6. cd /Users/yourname/Desktop
+7. cd /Users/yourname/Desktop/movement-dictionary-app
 
-5. Create a virtual environment (one time)
-  a. Inside the folder:
-  b. python3 -m venv .venv
-  c. Activate it (do this every time before running):
-    source .venv/bin/activate
+**Step Two: Create a virtual environment**
+1. Once you verify your location as /Users/yourname/Desktop/movement-dictionary-app , you can create a new virtual environment:
+  a. First, you need to make sure you are using python 10 or 11. Verify this by typing python3 --version (mac) or python --version (mac)
+  b. Next, after verifying you are using python 3.11 or 3.10, you can create the environemnt by typing in the terminal:
+   python3 -m venv .venv
+  c. Activate it (do this every time before running the app):
+
 
 **You should now see something like (.venv) at the beginning of your terminal prompt.**
-To stop using it later:
+To stop using it later write:
 ****deactivate****
 
 6. Install required Python packages
