@@ -203,12 +203,12 @@ def index():
         <p>
 
           This app will help you create a movement dictionary! You can record short videos that represent a concept and you can name these videos. 
-          The app will process them with line animation on a <strong>black background</strong>. It will save the processed videos into the
-             <strong>movement_dictionary</strong> folder, which you can access by clicking the link at the top of this page. To get started:<br>
+          The app will process your videos with line animation on a <strong>black background</strong>. It will save the processed videos onto the
+             <strong>movement_dictionary</strong> page, which you can access by clicking the link at the top of this page. To get started:<br>
           1. Name your movement concept; it will be saved with that name.<br>
           2. Click <strong>Start Recording</strong> to record a movement.<br>
           3. Click <strong>Stop Recording</strong> to end.<br>
-          4. Visit the Movement Dictionary page to view your movement concept.<br>
+          4. Visit the Movement Dictionary page to view your processed movements.<br>
         </p>
 
         <label for="clipName">Name this clip:</label>
