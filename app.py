@@ -147,7 +147,7 @@ def index():
     <html>
     <head>
       <meta charset="utf-8">
-      <title>Let's Make a Movement Dictionary!</title>
+      <title>My Movement Dictionary!</title>
       <style>
         body {
           font-family: Arial, sans-serif;
