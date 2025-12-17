@@ -16,7 +16,7 @@ What you need
 **Step One: Download the project**
 1.  Go to the repository link:
 
-[https://github.com/YOUR_USERNAME/movement-dictionary-app](https://github.com/ravitc10/Movement-Dictionary-Maker-Web-App)
+https://github.com/ravitc10/Movement-Dictionary-Maker-Web-App.git
 
 2. Click Code → Download ZIP
 3. Upload the folder into your coding environment
